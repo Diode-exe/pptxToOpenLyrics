@@ -1,11 +1,15 @@
 from pptx import Presentation
 from create_ol import OpenLyricsSong
 
+input_filename = input("Filename? ")
+title = input("Title? ")
+author = input("Author? ")
+
 # Load the PresentationML file (.pptx)
-prs = Presentation("Trembling and Shaking.pptx")
+prs = Presentation(input_filename)
 ol_song = OpenLyricsSong()
 
-root = ol_song.create_openlyrics("Trembling and Shaking", "Author Name", "Trembling_and_Shaking.xml")
+root = ol_song.create_openlyrics(title, author, input_filename.replace(".pptx", ".xml"))
 lyrics = root.find("lyrics")
 
 # Loop through slides and shape elements
@@ -19,4 +23,4 @@ for i, slide in enumerate(prs.slides):
             print(shape.text)
             ol_song.add_verse(lyrics, f"verse{i+1}", [shape.text])
 
-ol_song.pretty_and_save_xml(root, "Trembling_and_Shaking.xml")
+ol_song.pretty_and_save_xml(root, input_filename.replace(".pptx", ".xml"))

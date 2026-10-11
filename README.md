@@ -1,78 +1,59 @@
 # PPTX to OpenLyrics
 
-Convert the text from a PowerPoint presentation into an [OpenLyrics](https://openlyrics.org/) XML song file.
-
-The converter treats each slide as one verse. Text is collected from shapes that contain a text frame, then written to both the OpenLyrics XML output and a plain-text file.
+A small command-line script that extracts text from a PowerPoint presentation (`.pptx`) and writes an [OpenLyrics](https://openlyrics.org/) XML song file.
 
 ## Requirements
 
 - Python 3.12 or newer
 - A `.pptx` presentation
-- `python-pptx` 1.0.2 or newer
+- The project dependency `python-pptx` (declared in `pyproject.toml`)
 
-## Installation
-
-Create and activate a virtual environment, then install the project dependency:
+Install the dependency with pip:
 
 ```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
 python -m pip install "python-pptx>=1.0.2"
 ```
 
 ## Usage
 
-The current script uses fixed filenames. Place the presentation below in the project directory:
-
-```text
-Trembling and Shaking.pptx
-```
-
-Run the converter from the project directory:
+Run the script from the project directory:
 
 ```powershell
 python main.py
 ```
 
-The script prints the text found on each slide and creates or updates:
+When prompted, enter:
 
-- `Trembling_and_Shaking.xml` - an OpenLyrics 0.8 XML file with the title, author, and one verse per slide.
-- `lines.txt` - plain-text output containing the extracted shape text.
+1. The path to the PowerPoint file
+2. The song title
+3. The author
 
-## Output structure
+For example:
 
-Each slide becomes a verse named `verse1`, `verse2`, and so on. Each text-bearing shape on a slide is currently added as one line in that verse.
-
-The title and author are set in `main.py`:
-
-```python
-ol_song.create_openlyrics(
-	"Trembling and Shaking",
-	"Author Name",
-	"Trembling_and_Shaking.xml",
-)
+```text
+Filename? songs\example.pptx
+Title? Example Song
+Author? Songwriter Name
 ```
 
-Edit these values, along with the input filename, when converting a different presentation.
+The script writes an XML file by replacing `.pptx` in the entered filename with `.xml`. For the example above, the output is `songs\example.xml`.
 
-## Project files
+## What it converts
 
-| File | Purpose |
-| --- | --- |
-| `main.py` | Loads the presentation and coordinates conversion. |
-| `create_ol.py` | Builds OpenLyrics XML and writes extracted text. |
-| `pyproject.toml` | Project metadata and dependency declaration. |
-| `Trembling_and_Shaking.xml` | Example/generated OpenLyrics output. |
-| `lines.txt` | Example/generated plain-text extraction. |
+- It visits slides in presentation order and checks each shape on each slide.
+- For every shape with a text frame, it prints the shape's text and adds that text to the OpenLyrics XML.
+- Each text-bearing shape becomes its own `<verse>` element. Verse names use the slide number (`verse1`, `verse2`, and so on), so multiple text-bearing shapes on the same slide produce multiple verses with the same name.
+- The XML includes the prompted title and author, an OpenLyrics version of `0.8`, and the extracted text.
+- Extracted shape text is also appended to `lines.txt` in the current working directory. Repeated runs append more text; they do not clear this file.
 
-## Current limitations
+## Limitations
 
-- Input and output filenames are hardcoded; there are no command-line arguments yet.
-- The author is hardcoded to `Author Name` in `main.py`.
-- Each slide is always classified as a verse; chorus and bridge sections are not inferred.
-- `lines.txt` is opened in append mode, so repeated runs add to the existing file.
-- Missing files, malformed presentations, and other conversion errors are not handled explicitly.
+- The script is interactive; it does not accept command-line arguments.
+- It does not infer song sections such as chorus or bridge. All extracted text is added as verses.
+- Only shape text is extracted; images and other non-text slide content are not converted.
+- The output filename is formed by a case-sensitive replacement of `.pptx` with `.xml`. Use a lowercase `.pptx` extension to get the expected output name.
+- Invalid paths or unreadable presentations are not handled by the script.
 
 ## License
 
-This project is licensed under the terms in [LICENSE](LICENSE).
+This project is licensed under the MIT License. See [LICENSE](LICENSE).

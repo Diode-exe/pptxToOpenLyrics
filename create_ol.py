@@ -48,4 +48,8 @@ class OpenLyricsSong:
 
     def pretty_and_save_xml(self, root, filename):
         tree = ET.ElementTree(root)
-        tree.write(filename, encoding="utf-8", xml_declaration=True)
+        xml_str = ET.tostring(root, encoding="utf-8")
+        parsed_str = minidom.parseString(xml_str)
+        pretty_xml_as_string = parsed_str.toprettyxml(indent="  ")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(pretty_xml_as_string)
