@@ -9,7 +9,7 @@ author = input("Author? ")
 prs = Presentation(input_filename)
 ol_song = OpenLyricsSong()
 
-root = ol_song.create_openlyrics(title, author, input_filename.replace(".pptx", ".xml"))
+root = ol_song.create_openlyrics(title, author)
 lyrics = root.find("lyrics")
 
 # Loop through slides and shape elements

@@ -2,8 +2,20 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 
+def _xml_safe_text(text):
+    return "".join(
+        "\n" if char == "\v" else char
+        for char in text
+        if char == "\v"
+        or char in "\t\n\r"
+        or "\x20" <= char <= "\ud7ff"
+        or "\ue000" <= char <= "\ufffd"
+        or "\U00010000" <= char <= "\U0010ffff"
+    )
+
+
 class OpenLyricsSong:
-    def create_openlyrics(self, title, author, filename):
+    def create_openlyrics(self, title, author):
         # 1. Create the root element with required namespaces
         root = ET.Element("song", {
             "xmlns": "http://openlyrics.info",
@@ -19,17 +31,14 @@ class OpenLyricsSong:
         
         titles = ET.SubElement(properties, "titles")
         title_element = ET.SubElement(titles, "title")
-        title_element.text = title
+        title_element.text = _xml_safe_text(title)
         
         authors = ET.SubElement(properties, "authors")
         author_element = ET.SubElement(authors, "author")
-        author_element.text = author
+        author_element.text = _xml_safe_text(author)
 
         # 3. Add Lyrics Content
         lyrics = ET.SubElement(root, "lyrics")
-        
-        tree._setroot(root)
-        tree.write(filename, encoding="utf-8")
         
         return root
         
@@ -40,7 +49,7 @@ class OpenLyricsSong:
         
         for line_text in lines_text:
             line = ET.SubElement(lines, "line")
-            line.text = line_text
+            line.text = _xml_safe_text(line_text)
 
         with open("lines.txt", "a", encoding="utf-8") as f:
             for line_text in lines_text:
