@@ -1,7 +1,7 @@
-from PySide6.QtCore import QFile
-from PySide6.QtWidgets import QApplication, QVBoxLayout
-from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import (
+from PySide6.QtCore import QFile, QObject, Signal # pylint: disable=E0611
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QProgressBar # pylint: disable=E0611
+from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
+from PySide6.QtWidgets import ( # pylint: disable=E0611
     QLabel,
     QPushButton,
     QFileDialog,
@@ -35,26 +35,22 @@ class GUI:
         layout = QVBoxLayout(self.window.centralWidget())
 
         self.title_label = self.window.findChild(QLabel, "title_label")
-        # layout.addWidget(self.title_label)
         self.title_entry = self.window.findChild(QLineEdit, "title_entry")
-        # layout.addWidget(self.title_entry)
 
         self.author_label = self.window.findChild(QLabel, "author_label")
-        # layout.addWidget(self.author_label)
         self.author_entry = self.window.findChild(QLineEdit, "author_entry")
-        # layout.addWidget(self.author_entry)
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
-        # layout.addWidget(self.file_chooser_button)
 
         self.blank_slide_var = self.window.findChild(QCheckBox, "blank_slide_checkbox")
-        # layout.addWidget(self.blank_slide_var)
 
         self.submit_button = self.window.findChild(QPushButton, "start_button")
         self.submit_button.clicked.connect(self.submit)
-        # layout.addWidget(self.submit_button)
 
+        self.progress_bar = self.window.findChild(QProgressBar, "progress_bar")
+        self.progress_bar.setValue(0)
+        
         self.window.show()
 
     def choose_file(self):
@@ -74,6 +70,7 @@ class GUI:
         self.blank_slide = self.blank_slide_var.isChecked()
 
         converter = Converter()
+        converter.progress_signal.connect(self.progress_bar.setValue)
         converter.convert(self.input_filename, self.title, self.author, self.blank_slide)
 
         QMessageBox.information(
@@ -82,8 +79,11 @@ class GUI:
             "The PPTX file has been successfully converted to OpenLyrics XML.",
         )
 
-class Converter:
+class Converter(QObject):
+    progress_signal = Signal(int) # pylint: disable=E0611
+
     def __init__(self):
+        super().__init__()
         self.input_filename = None
         self.title = ""
         self.author = ""
@@ -115,11 +115,13 @@ class Converter:
                         #     print(paragraph.text)
                     print(shape.text)
                     self.ol_song.add_verse(self.lyrics, f"verse{i+1}", [shape.text])
+            # self.progress_bar.setValue(int(((i + 1) / len(self.prs.slides)) * 100))
+            self.progress_signal.emit(int(((i + 1) / len(self.prs.slides)) * 100))
             if self.blank_slide:
                 self.ol_song.add_verse(self.lyrics, f"verse{i+1}", [""])
 
         self.ol_song.pretty_and_save_xml(self.root, self.input_filename.replace(".pptx", ".xml"))
-        
+
 if __name__ == "__main__":
     app = QApplication([])
     gui = GUI()
