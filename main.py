@@ -37,12 +37,12 @@ class GUI:
         self.title_label = self.window.findChild(QLabel, "title_label")
         # layout.addWidget(self.title_label)
         self.title_entry = self.window.findChild(QLineEdit, "title_entry")
-        layout.addWidget(self.title_entry)
+        # layout.addWidget(self.title_entry)
 
         self.author_label = self.window.findChild(QLabel, "author_label")
         # layout.addWidget(self.author_label)
         self.author_entry = self.window.findChild(QLineEdit, "author_entry")
-        layout.addWidget(self.author_entry)
+        # layout.addWidget(self.author_entry)
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
