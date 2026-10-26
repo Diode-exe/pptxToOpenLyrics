@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 from pptx import Presentation
 from create_ol import OpenLyricsSong
@@ -13,27 +13,36 @@ class GUI:
         self.root.bind("<Return>", lambda event: self.submit())
 
         self.title_var = tk.StringVar()
+        self.title_entry_text = tk.Label(self.root, text="Title")
+        self.title_entry_text.pack()
         self.title_entry = tk.Entry(self.root, textvariable=self.title_var)
         self.title_entry.pack()
 
         self.author_var = tk.StringVar()
+        self.author_entry_text = tk.Label(self.root, text="Author")
+        self.author_entry_text.pack()
         self.author_entry = tk.Entry(self.root, textvariable=self.author_var)
         self.author_entry.pack()
 
-        self.submit_button = tk.Button(self.root, text="Submit", command=self.submit)
-        self.submit_button.pack()
-
-        self.blank_slide_var = tk.BooleanVar()
-        self.blank_slide_check = tk.Checkbutton(self.root, text="Blank Slide", variable=self.blank_slide_var)
-        self.blank_slide_check.pack()
 
         self.file_chooser_button = tk.Button(self.root, text="Choose File", command=self.choose_file)
         self.file_chooser_button.pack()
+
+        self.blank_slide_var = tk.BooleanVar()
+        self.blank_slide_check = tk.Checkbutton(self.root, text="Blank slide at the end", variable=self.blank_slide_var)
+        self.blank_slide_check.pack()
+
+        self.submit_button = tk.Button(self.root, text="Submit", command=self.submit)
+        self.submit_button.pack()
 
     def choose_file(self):
         self.input_filename = filedialog.askopenfilename(filetypes=[("PPTX files", "*.pptx")])
 
     def submit(self):
+        if not self.input_filename:
+            messagebox.showerror("No file selected", "Please choose a PPTX file first.")
+            return
+
         self.title = self.title_var.get()
         self.author = self.author_var.get()
         self.blank_slide = self.blank_slide_var.get()
