@@ -4,6 +4,7 @@ from create_ol import OpenLyricsSong
 input_filename = input("Filename? ")
 title = input("Title? ")
 author = input("Author? ")
+blank_slide = input("Blank slide (y/n)? ").lower() == "y"
 
 # Load the PresentationML file (.pptx)
 prs = Presentation(input_filename)
@@ -22,5 +23,7 @@ for i, slide in enumerate(prs.slides):
                 #     print(paragraph.text)
             print(shape.text)
             ol_song.add_verse(lyrics, f"verse{i+1}", [shape.text])
+    if blank_slide:
+        ol_song.add_verse(lyrics, f"verse{i+1}", [""])
 
 ol_song.pretty_and_save_xml(root, input_filename.replace(".pptx", ".xml"))
