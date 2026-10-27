@@ -22,12 +22,14 @@ class GUI:
         self.title = ""
         self.author = ""
         self.blank_slide = False
-        self.source_dir = ""
+        self.file_picker_dir = ""
+        self.dest_picker_dir = ""
         if not os.path.exists("settings.json"):
             self.create_settings()
         settings = self.load_settings_file()
         if settings:
-            self.source_dir = settings.get("source_dir", "")
+            self.file_picker_dir = settings.get("file_picker_dir", "")
+            self.dest_picker_dir = settings.get("dest_picker_dir", "")
         self.prs = None
         self.ol_song = None
 
@@ -56,6 +58,9 @@ class GUI:
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
 
+        self.dest_chooser_button = self.window.findChild(QPushButton, "choose_dest_button")
+        self.dest_chooser_button.clicked.connect(self.choose_dest)
+
         self.blank_slide_var = self.window.findChild(QCheckBox, "blank_slide_checkbox")
 
         self.submit_button = self.window.findChild(QPushButton, "start_button")
@@ -68,8 +73,13 @@ class GUI:
 
     def choose_file(self):
         self.input_filename = QFileDialog.getOpenFileName(
-            self.window, "Select PPTX file", self.source_dir, "PPTX files (*.pptx)",
+            self.window, "Select PPTX file", self.file_picker_dir, "PPTX files (*.pptx)",
         )[0]
+
+    def choose_dest(self):
+        self.dest_picker_dir = QFileDialog.getExistingDirectory(
+            self.window, "Select Destination Directory", self.dest_picker_dir
+        )
 
     def submit(self):
         if not self.input_filename:
@@ -84,11 +94,11 @@ class GUI:
 
         converter = Converter()
         converter.progress_signal.connect(self.progress_bar.setValue)
-        conversion_time = converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked())
+        conversion_time = converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
         self.set_time(conversion_time)
 
-        self.source_dir = os.path.dirname(self.input_filename)
         self.update_settings()
+
         QMessageBox.information(
             self.window,
             "Conversion Complete",
@@ -106,7 +116,8 @@ class GUI:
 
     def create_settings(self):
         settings = {
-            "source_dir": self.source_dir
+            "file_picker_dir": self.file_picker_dir,
+            "dest_picker_dir": self.dest_picker_dir
         }
         with open("settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
@@ -120,10 +131,11 @@ class GUI:
 
     def update_settings(self):
         if not os.path.exists("settings.json"):
-            return
+            self.create_settings()
         with open("settings.json", "r", encoding="utf-8") as f:
             settings = json.load(f)
-        settings["source_dir"] = self.source_dir
+        settings["file_picker_dir"] = self.file_picker_dir
+        settings["dest_picker_dir"] = self.dest_picker_dir
         with open("settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
 
@@ -135,19 +147,21 @@ class Converter(QObject):
         self.input_filename = None
         self.title = ""
         self.author = ""
+        self.dest_picker_dir = ""
         self.blank_slide = False
         self.prs = None
         self.ol_song = None
         self.root = None
         self.lyrics = None
 
-    def convert(self, input_filename, title, author, blank_slide, assume_title):
+    def convert(self, input_filename, title, author, blank_slide, assume_title, dest_picker_dir):
         start_time = time.perf_counter()
         self.input_filename = input_filename
         self.title = title
         self.author = author
         self.blank_slide = blank_slide
         self.assume_title = assume_title
+        self.dest_picker_dir = dest_picker_dir
 
         self.prs = Presentation(self.input_filename)
         self.ol_song = OpenLyricsSong()
@@ -175,7 +189,7 @@ class Converter(QObject):
             if self.blank_slide:
                 self.ol_song.add_verse(self.lyrics, f"verse{i+1}", [""])
 
-        self.ol_song.pretty_and_save_xml(self.root, self.input_filename.replace(".pptx", ".xml"))
+        self.ol_song.pretty_and_save_xml(self.root, os.path.join(self.dest_picker_dir, os.path.basename(self.input_filename.replace(".pptx", ".xml"))))
         end_time = time.perf_counter()
         print(f"Conversion time: {end_time - start_time:.2f} seconds")
         return end_time - start_time
