@@ -119,9 +119,7 @@ class GUI:
         self.time_label.setText(f"Conversion took {value:.2f} seconds")
 
     def show_splitter(self):
-        self.splitter_window = splitter.Splitter(self.input_filename)
-        self.splitter_window.window.show()
-        self.splitter_window.render_checkboxes()
+        self.splitter_window = splitter.Splitter()
 
     def create_settings(self):
         settings = {
