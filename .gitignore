@@ -184,3 +184,4 @@ cython_debug/
 Trembling and Shaking/
 *.zip
 lines.txt
+*.json
