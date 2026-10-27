@@ -24,7 +24,7 @@ class GUI:
         self.blank_slide = False
         self.file_picker_dir = ""
         self.dest_picker_dir = ""
-        if not os.path.exists("settings.json"):
+        if not os.path.exists("src/settings.json"):
             self.create_settings()
         settings = self.load_settings_file()
         if settings:
@@ -33,14 +33,14 @@ class GUI:
         self.prs = None
         self.ol_song = None
 
-        ui_file = QFile("main.ui")
+        ui_file = QFile("src/main.ui")
 
         loader = QUiLoader()
         self.window = loader.load(ui_file)
         ui_file.close()
 
         if self.window is None:
-            raise RuntimeError(f"Could not load main.ui: {loader.errorString()}")
+            raise RuntimeError(f"Could not load src/main.ui: {loader.errorString()}")
 
         self.window.setWindowTitle("PPTX to OpenLyrics Converter")
         layout = QVBoxLayout(self.window.centralWidget())
@@ -119,24 +119,24 @@ class GUI:
             "file_picker_dir": self.file_picker_dir,
             "dest_picker_dir": self.dest_picker_dir
         }
-        with open("settings.json", "w", encoding="utf-8") as f:
+        with open("src/settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
 
     def load_settings_file(self):
-        if not os.path.exists("settings.json"):
+        if not os.path.exists("src/settings.json"):
             return
-        with open("settings.json", "r", encoding="utf-8") as f:
+        with open("src/settings.json", "r", encoding="utf-8") as f:
             settings = json.load(f)
         return settings
 
     def update_settings(self):
-        if not os.path.exists("settings.json"):
+        if not os.path.exists("src/settings.json"):
             self.create_settings()
-        with open("settings.json", "r", encoding="utf-8") as f:
+        with open("src/settings.json", "r", encoding="utf-8") as f:
             settings = json.load(f)
         settings["file_picker_dir"] = self.file_picker_dir
         settings["dest_picker_dir"] = self.dest_picker_dir
-        with open("settings.json", "w", encoding="utf-8") as f:
+        with open("src/settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
 
 class Converter(QObject):
