@@ -1,6 +1,6 @@
 # PPTX to OpenLyrics
 
-A small command-line script that extracts text from a PowerPoint presentation (`.pptx`) and writes an [OpenLyrics](https://openlyrics.org/) XML song file.
+A small GUI program that extracts text from a PowerPoint presentation (`.pptx`) and writes an [OpenLyrics](https://openlyrics.org/) XML song file.
 
 ## Requirements
 
@@ -8,10 +8,11 @@ A small command-line script that extracts text from a PowerPoint presentation (`
 - A `.pptx` presentation
 - The project dependency `python-pptx` (declared in `pyproject.toml`)
 
-Install the dependency with pip:
+Sync with uv:
 
 ```powershell
-python -m pip install "python-pptx>=1.0.2"
+uv sync
+uv activate
 ```
 
 ## Usage
@@ -22,19 +23,9 @@ Run the script from the project directory:
 python main.py
 ```
 
-When prompted, enter:
+The GUI is very simple and user-friendly, allowing you to select a PowerPoint file and choose which slides to include in the output.
 
-1. The path to the PowerPoint file
-2. The song title
-3. The author
-
-For example:
-
-```text
-Filename? songs\example.pptx
-Title? Example Song
-Author? Songwriter Name
-```
+![Slide Splitter GUI](images/screenshot0.png)
 
 The script writes an XML file by replacing `.pptx` in the entered filename with `.xml`. For the example above, the output is `songs\example.xml`.
 
@@ -48,11 +39,9 @@ The script writes an XML file by replacing `.pptx` in the entered filename with 
 
 ## Limitations
 
-- The script is interactive; it does not accept command-line arguments.
+- The GUI is interactive; it does not accept command-line arguments.
 - It does not infer song sections such as chorus or bridge. All extracted text is added as verses.
 - Only shape text is extracted; images and other non-text slide content are not converted.
-- The output filename is formed by a case-sensitive replacement of `.pptx` with `.xml`. Use a lowercase `.pptx` extension to get the expected output name.
-- Invalid paths or unreadable presentations are not handled by the script.
 
 ## License
 
