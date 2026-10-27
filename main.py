@@ -112,7 +112,7 @@ class GUI:
             self.title_entry.setDisabled(False)
 
     def set_time(self, value):
-        self.time_label.setText(f"{value:.2f}")
+        self.time_label.setText(f"Conversion took {value:.2f} seconds")
 
     def create_settings(self):
         settings = {
