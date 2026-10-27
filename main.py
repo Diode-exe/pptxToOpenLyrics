@@ -1,3 +1,6 @@
+import time
+import json
+import os
 from PySide6.QtCore import QFile, QObject, Signal # pylint: disable=E0611
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QProgressBar # pylint: disable=E0611
 from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
@@ -9,7 +12,6 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
     QMessageBox,
     QLineEdit,
 )
-import time
 
 from pptx import Presentation
 from create_ol import OpenLyricsSong
@@ -20,6 +22,12 @@ class GUI:
         self.title = ""
         self.author = ""
         self.blank_slide = False
+        self.source_dir = ""
+        if not os.path.exists("settings.json"):
+            self.create_settings()
+        settings = self.load_settings_file()
+        if settings:
+            self.source_dir = settings.get("source_dir", "")
         self.prs = None
         self.ol_song = None
 
@@ -60,7 +68,7 @@ class GUI:
 
     def choose_file(self):
         self.input_filename = QFileDialog.getOpenFileName(
-            self.window, "Select PPTX file", "", "PPTX files (*.pptx)"
+            self.window, "Select PPTX file", self.source_dir, "PPTX files (*.pptx)",
         )[0]
 
     def submit(self):
@@ -79,6 +87,8 @@ class GUI:
         conversion_time = converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked())
         self.set_time(conversion_time)
 
+        self.source_dir = os.path.dirname(self.input_filename)
+        self.update_settings()
         QMessageBox.information(
             self.window,
             "Conversion Complete",
@@ -93,6 +103,29 @@ class GUI:
 
     def set_time(self, value):
         self.time_label.setText(f"{value:.2f}")
+
+    def create_settings(self):
+        settings = {
+            "source_dir": self.source_dir
+        }
+        with open("settings.json", "w", encoding="utf-8") as f:
+            json.dump(settings, f)
+
+    def load_settings_file(self):
+        if not os.path.exists("settings.json"):
+            return
+        with open("settings.json", "r", encoding="utf-8") as f:
+            settings = json.load(f)
+        return settings
+
+    def update_settings(self):
+        if not os.path.exists("settings.json"):
+            return
+        with open("settings.json", "r", encoding="utf-8") as f:
+            settings = json.load(f)
+        settings["source_dir"] = self.source_dir
+        with open("settings.json", "w", encoding="utf-8") as f:
+            json.dump(settings, f)
 
 class Converter(QObject):
     progress_signal = Signal(int) # pylint: disable=E0611
