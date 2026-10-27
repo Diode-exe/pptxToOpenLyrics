@@ -36,6 +36,8 @@ class GUI:
 
         self.title_label = self.window.findChild(QLabel, "title_label")
         self.title_entry = self.window.findChild(QLineEdit, "title_entry")
+        self.guess_title_button = self.window.findChild(QCheckBox, "guess_song_checkbox")
+        self.guess_title_button.stateChanged.connect(self.toggle_title_entry)
 
         self.author_label = self.window.findChild(QLabel, "author_label")
         self.author_entry = self.window.findChild(QLineEdit, "author_entry")
@@ -78,6 +80,12 @@ class GUI:
             "Conversion Complete",
             "The PPTX file has been successfully converted to OpenLyrics XML.",
         )
+    
+    def toggle_title_entry(self, state):
+        if state == 2:  # Checked
+            self.title_entry.setDisabled(True)
+        else:
+            self.title_entry.setDisabled(False)
 
 class Converter(QObject):
     progress_signal = Signal(int) # pylint: disable=E0611
