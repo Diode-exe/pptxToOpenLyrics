@@ -9,6 +9,7 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
     QMessageBox,
     QLineEdit,
 )
+import time
 
 from pptx import Presentation
 from create_ol import OpenLyricsSong
@@ -34,6 +35,8 @@ class GUI:
         self.window.setWindowTitle("PPTX to OpenLyrics Converter")
         layout = QVBoxLayout(self.window.centralWidget())
 
+        self.time_label = self.window.findChild(QLabel, "time_label")
+
         self.title_label = self.window.findChild(QLabel, "title_label")
         self.title_entry = self.window.findChild(QLineEdit, "title_entry")
         self.guess_title_button = self.window.findChild(QCheckBox, "guess_song_checkbox")
@@ -52,7 +55,7 @@ class GUI:
 
         self.progress_bar = self.window.findChild(QProgressBar, "progress_bar")
         self.progress_bar.setValue(0)
-        
+
         self.window.show()
 
     def choose_file(self):
@@ -73,19 +76,23 @@ class GUI:
 
         converter = Converter()
         converter.progress_signal.connect(self.progress_bar.setValue)
-        converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked())
+        conversion_time = converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked())
+        self.set_time(conversion_time)
 
         QMessageBox.information(
             self.window,
             "Conversion Complete",
             "The PPTX file has been successfully converted to OpenLyrics XML.",
         )
-    
+
     def toggle_title_entry(self, state):
         if state == 2:  # Checked
             self.title_entry.setDisabled(True)
         else:
             self.title_entry.setDisabled(False)
+
+    def set_time(self, value):
+        self.time_label.setText(f"{value:.2f}")
 
 class Converter(QObject):
     progress_signal = Signal(int) # pylint: disable=E0611
@@ -102,6 +109,7 @@ class Converter(QObject):
         self.lyrics = None
 
     def convert(self, input_filename, title, author, blank_slide, assume_title):
+        start_time = time.perf_counter()
         self.input_filename = input_filename
         self.title = title
         self.author = author
@@ -110,9 +118,9 @@ class Converter(QObject):
 
         self.prs = Presentation(self.input_filename)
         self.ol_song = OpenLyricsSong()
-        
+
         if self.assume_title:
-            self.title = self.prs.slides[0].shapes[0].text if self.prs.slides and self.prs.slides[0].shapes and self.title else QMessageBox.critical(
+            self.title = self.prs.slides[0].shapes[0].text if self.prs.slides and self.prs.slides[0].shapes or self.title else QMessageBox.critical(
                 None, "No Title Found", "Please provide a title for the song."
             )
 
@@ -135,6 +143,9 @@ class Converter(QObject):
                 self.ol_song.add_verse(self.lyrics, f"verse{i+1}", [""])
 
         self.ol_song.pretty_and_save_xml(self.root, self.input_filename.replace(".pptx", ".xml"))
+        end_time = time.perf_counter()
+        print(f"Conversion time: {end_time - start_time:.2f} seconds")
+        return end_time - start_time
 
 if __name__ == "__main__":
     app = QApplication([])
