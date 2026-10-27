@@ -44,7 +44,7 @@
      <item>
       <widget class="QCheckBox" name="guess_song_checkbox">
        <property name="toolTip">
-        <string>Assumes first slide is the title. The first text box found will be used. </string>
+        <string>Assumes first slide is the title. The first text box found will be used. If the first slide is blank, </string>
        </property>
        <property name="text">
         <string>Guess Song Title</string>

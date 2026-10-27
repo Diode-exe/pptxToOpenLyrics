@@ -73,7 +73,7 @@ class GUI:
 
         converter = Converter()
         converter.progress_signal.connect(self.progress_bar.setValue)
-        converter.convert(self.input_filename, self.title, self.author, self.blank_slide)
+        converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked())
 
         QMessageBox.information(
             self.window,
@@ -101,14 +101,20 @@ class Converter(QObject):
         self.root = None
         self.lyrics = None
 
-    def convert(self, input_filename, title, author, blank_slide):
+    def convert(self, input_filename, title, author, blank_slide, assume_title):
         self.input_filename = input_filename
         self.title = title
         self.author = author
         self.blank_slide = blank_slide
+        self.assume_title = assume_title
 
         self.prs = Presentation(self.input_filename)
         self.ol_song = OpenLyricsSong()
+        
+        if self.assume_title:
+            self.title = self.prs.slides[0].shapes[0].text if self.prs.slides and self.prs.slides[0].shapes and self.title else QMessageBox.critical(
+                None, "No Title Found", "Please provide a title for the song."
+            )
 
         self.root = self.ol_song.create_openlyrics(self.title, self.author)
         self.lyrics = self.root.find("lyrics")
