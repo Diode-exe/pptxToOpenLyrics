@@ -37,7 +37,7 @@ class GUI:
         self.title_label = self.window.findChild(QLabel, "title_label")
         self.title_entry = self.window.findChild(QLineEdit, "title_entry")
         self.guess_title_button = self.window.findChild(QCheckBox, "guess_song_checkbox")
-        self.guess_title_button.stateChanged.connect(self.toggle_title_entry)
+        # self.guess_title_button.stateChanged.connect(self.toggle_title_entry)
 
         self.author_label = self.window.findChild(QLabel, "author_label")
         self.author_entry = self.window.findChild(QLineEdit, "author_entry")
