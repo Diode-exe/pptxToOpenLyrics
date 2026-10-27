@@ -12,6 +12,7 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
     QMessageBox,
     QLineEdit,
 )
+import splitter
 
 from pptx import Presentation
 from create_ol import OpenLyricsSong
@@ -68,6 +69,9 @@ class GUI:
 
         self.progress_bar = self.window.findChild(QProgressBar, "progress_bar")
         self.progress_bar.setValue(0)
+        
+        self.splitter_button = self.window.findChild(QPushButton, "splitter_button")
+        self.splitter_button.clicked.connect(self.show_splitter)
 
         self.window.show()
 
@@ -113,6 +117,11 @@ class GUI:
 
     def set_time(self, value):
         self.time_label.setText(f"Conversion took {value:.2f} seconds")
+
+    def show_splitter(self):
+        self.splitter_window = splitter.Splitter(self.input_filename)
+        self.splitter_window.window.show()
+        self.splitter_window.render_checkboxes()
 
     def create_settings(self):
         settings = {
