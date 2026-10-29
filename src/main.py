@@ -72,14 +72,20 @@ class GUI:
         self.window.show()
 
     def choose_file(self):
+        start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
         self.input_filename = QFileDialog.getOpenFileName(
-            self.window, "Select PPTX file", self.file_picker_dir, "PPTX files (*.pptx)",
+            self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
         )[0]
+        if self.input_filename:
+            self.file_picker_dir = os.path.dirname(self.input_filename)
 
     def choose_dest(self):
-        self.dest_picker_dir = QFileDialog.getExistingDirectory(
-            self.window, "Select Destination Directory", self.dest_picker_dir
+        start_dir = self.dest_picker_dir if os.path.isdir(self.dest_picker_dir) else os.path.expanduser("~")
+        chosen = QFileDialog.getExistingDirectory(
+            self.window, "Select Destination Directory", start_dir
         )
+        if chosen:
+            self.dest_picker_dir = chosen
 
     def submit(self):
         if not self.input_filename:
