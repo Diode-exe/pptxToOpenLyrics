@@ -193,7 +193,8 @@ class Converter(QObject):
             # self.progress_bar.setValue(int(((i + 1) / len(self.prs.slides)) * 100))
             self.progress_signal.emit(int(((i + 1) / len(self.prs.slides)) * 100))
         if self.blank_slide:
-            self.ol_song.add_verse(self.lyrics, f"v{i+1}", [""])
+            self.ol_song.add_verse(self.lyrics, f"v{i+1}", [""]) # pylint: disable=undefined-loop-variable
+        self.ol_song.update_verse_order(i + 1)
 
         self.ol_song.pretty_and_save_xml(self.root, os.path.join(self.dest_picker_dir, os.path.basename(self.input_filename.replace(".pptx", ".xml"))))
         end_time = time.perf_counter()

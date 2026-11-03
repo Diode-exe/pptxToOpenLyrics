@@ -15,6 +15,9 @@ def _xml_safe_text(text):
 
 
 class OpenLyricsSong:
+    def __init__(self):
+        self.root = None
+
     def create_openlyrics(self, title, author):
         # 1. Create the root element with required namespaces
         root = ET.Element("song", {
@@ -28,25 +31,30 @@ class OpenLyricsSong:
 
         # 2. Add Properties (Metadata)
         properties = ET.SubElement(root, "properties")
-        
+
         titles = ET.SubElement(properties, "titles")
         title_element = ET.SubElement(titles, "title")
         title_element.text = _xml_safe_text(title)
-        
+
         authors = ET.SubElement(properties, "authors")
         author_element = ET.SubElement(authors, "author")
         author_element.text = _xml_safe_text(author)
 
+        verse_order_element = ET.SubElement(properties, "verseOrder")
+        verse_order_element.text = ""
+
         # 3. Add Lyrics Content
         lyrics = ET.SubElement(root, "lyrics")
         
+        self.root = root
+
         return root
-        
+
     def add_verse(self, lyrics, verse_number, lines_text):
         # Verse 1
         verse = ET.SubElement(lyrics, "verse", {"name": verse_number})
         lines = ET.SubElement(verse, "lines")
-        
+
         for line_text in lines_text:
             line = ET.SubElement(lines, "line")
             line.text = _xml_safe_text(line_text)
@@ -54,6 +62,11 @@ class OpenLyricsSong:
         with open("lines.txt", "a", encoding="utf-8") as f:
             for line_text in lines_text:
                 f.write(line_text + "\n")
+
+    def update_verse_order(self, verse_count):
+        verse_order_element = self.root.find(".//verseOrder")
+        if verse_order_element is not None:
+            verse_order_element.text = " ".join(f"v{i+1}" for i in range(verse_count))
 
     def pretty_and_save_xml(self, root, filename):
         tree = ET.ElementTree(root)
