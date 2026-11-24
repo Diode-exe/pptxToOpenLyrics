@@ -80,11 +80,11 @@ class GUI:
 
     def choose_file(self):
         start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
-        self.input_filename = QFileDialog.getOpenFileName(
+        self.input_filenames = QFileDialog.getOpenFileNames(
             self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
         )[0]
-        if self.input_filename:
-            self.file_picker_dir = os.path.dirname(self.input_filename)
+        if self.input_filenames:
+            self.file_picker_dir = os.path.dirname(self.input_filenames[0])
 
     def choose_dest(self):
         start_dir = self.dest_picker_dir if os.path.isdir(self.dest_picker_dir) else os.path.expanduser("~")
@@ -95,7 +95,7 @@ class GUI:
             self.dest_picker_dir = chosen
 
     def submit(self):
-        if not self.input_filename:
+        if not self.input_filenames:
             QMessageBox.critical(
                 self.window, "No file selected", "Please choose a PPTX file first."
             )
@@ -107,7 +107,7 @@ class GUI:
 
         converter = Converter()
         converter.progress_signal.connect(self.progress_bar.setValue)
-        conversion_time = converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
+        conversion_time = converter.convert(self.input_filenames[0], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
         self.set_time(conversion_time)
 
         self.update_settings()
