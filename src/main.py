@@ -19,6 +19,7 @@ from create_ol import OpenLyricsSong
 class GUI:
     def __init__(self):
         self.input_filename = None
+        self.input_filenames = []
         self.title = ""
         self.author = ""
         self.blank_slide = False
@@ -61,6 +62,7 @@ class GUI:
         
         self.batching_scroll = self.window.findChild(QScrollArea, "batching_scroll")
         self.batching_scroll_contents = self.window.findChild(QWidget, "batching_scroll_contents")
+        self.batching_scroll_layout = QVBoxLayout(self.batching_scroll_contents)
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
@@ -80,13 +82,14 @@ class GUI:
 
     def choose_file(self):
         start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
-        self.input_filenames = QFileDialog.getOpenFileNames(
+        input_filenames, _ = QFileDialog.getOpenFileNames(
             self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
         )
-        if len(self.input_filenames) > 1:
-            self.add_files_to_scroll()
-        if self.input_filenames:
-            self.file_picker_dir = os.path.dirname(self.input_filenames[0])
+        if not input_filenames:
+            return
+        self.input_filenames = input_filenames
+        self.add_files_to_scroll()
+        self.file_picker_dir = os.path.dirname(self.input_filenames[0])
 
     def choose_dest(self):
         start_dir = self.dest_picker_dir if os.path.isdir(self.dest_picker_dir) else os.path.expanduser("~")
@@ -155,9 +158,16 @@ class GUI:
             json.dump(settings, f)
             
     def add_files_to_scroll(self):
+        while self.batching_scroll_layout.count():
+            item = self.batching_scroll_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
         for filename in self.input_filenames:
             label = QLabel(os.path.basename(filename))
-            self.batching_scroll.addWidget(label)
+            batch_author_name_entry = QLineEdit()
+            self.batching_scroll_layout.addWidget(label)
+            self.batching_scroll_layout.addWidget(batch_author_name_entry)
+            
 
 class Converter(QObject):
     progress_signal = Signal(int) # pylint: disable=E0611
