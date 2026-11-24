@@ -13,6 +13,7 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
     QCheckBox,
     QMessageBox,
     QLineEdit,
+    QComboBox,
 )
 
 from pptx import Presentation
@@ -58,6 +59,8 @@ class GUI:
 
         self.author_label = self.window.findChild(QLabel, "author_label")
         self.author_entry = self.window.findChild(QLineEdit, "author_entry")
+        
+        self.author_type = self.window.findChild(QComboBox, "author_type")
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
