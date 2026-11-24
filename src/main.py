@@ -2,7 +2,7 @@ import time
 import json
 import os
 from PySide6.QtCore import QFile, QObject, Signal # pylint: disable=E0611
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QProgressBar # pylint: disable=E0611
+from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QProgressBar, QWidget, QComboBox # pylint: disable=E0611
 from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
 from PySide6.QtWidgets import ( # pylint: disable=E0611
     QLabel,
@@ -54,6 +54,13 @@ class GUI:
 
         self.author_label = self.window.findChild(QLabel, "author_label")
         self.author_entry = self.window.findChild(QLineEdit, "author_entry")
+
+        self.author_type = self.window.findChild(QComboBox, "author_type")
+        # default to no type, just like the author entry is empty by default in OpenLP
+        self.author_type.addItems(["", "words", "music", "words and music", "translation"])
+        
+        self.batching_scroll = self.window.findChild(QScrollArea, "batching_scroll")
+        self.batching_scroll_contents = self.window.findChild(QWidget, "batching_scroll_contents")
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
