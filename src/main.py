@@ -112,7 +112,8 @@ class GUI:
 
         converter = Converter()
         converter.progress_signal.connect(self.progress_bar.setValue)
-        conversion_time = converter.convert(self.input_filenames[0], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
+        for i, label in enumerate(self.batching_scroll_layout.children()):
+            conversion_time = converter.convert(self.input_filenames[i], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
         self.set_time(conversion_time)
 
         self.update_settings()
