@@ -61,6 +61,8 @@ class GUI:
         self.author_entry = self.window.findChild(QLineEdit, "author_entry")
         
         self.author_type = self.window.findChild(QComboBox, "author_type")
+        # default to no type, just like the author entry is empty by default in OpenLP
+        self.author_type.addItems(["", "Words", "Music", "Words and Music", "Translation"])
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
