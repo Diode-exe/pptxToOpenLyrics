@@ -1,3 +1,5 @@
+"""PPTX to OpenLyrics Converter GUI"""
+
 import time
 import json
 import os
@@ -17,6 +19,7 @@ from pptx import Presentation
 from create_ol import OpenLyricsSong
 
 class GUI:
+    """Graphical User Interface for the PPTX to OpenLyrics Converter."""
     def __init__(self):
         self.input_filename = None
         self.title = ""
@@ -43,7 +46,8 @@ class GUI:
             raise RuntimeError(f"Could not load src/main.ui: {loader.errorString()}")
 
         self.window.setWindowTitle("PPTX to OpenLyrics Converter")
-        layout = QVBoxLayout(self.window.centralWidget())
+        # layout = QVBoxLayout(self.window.centralWidget())
+        _ = QVBoxLayout(self.window.centralWidget())
 
         self.time_label = self.window.findChild(QLabel, "time_label")
 
@@ -72,6 +76,7 @@ class GUI:
         self.window.show()
 
     def choose_file(self):
+        """Open a file dialog to choose a PPTX file."""
         start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
         self.input_filename = QFileDialog.getOpenFileName(
             self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
@@ -80,6 +85,7 @@ class GUI:
             self.file_picker_dir = os.path.dirname(self.input_filename)
 
     def choose_dest(self):
+        """Open a file dialog to choose the destination directory."""
         start_dir = self.dest_picker_dir if os.path.isdir(self.dest_picker_dir) else os.path.expanduser("~")
         chosen = QFileDialog.getExistingDirectory(
             self.window, "Select Destination Directory", start_dir
@@ -88,6 +94,7 @@ class GUI:
             self.dest_picker_dir = chosen
 
     def submit(self):
+        """Handle the submission of the conversion form."""
         if not self.input_filename:
             QMessageBox.critical(
                 self.window, "No file selected", "Please choose a PPTX file first."
@@ -112,15 +119,18 @@ class GUI:
         )
 
     def toggle_title_entry(self, state):
+        """Enable or disable the title entry based on the checkbox state."""
         if state == 2:  # Checked
             self.title_entry.setDisabled(True)
         else:
             self.title_entry.setDisabled(False)
 
     def set_time(self, value):
+        """Set the conversion time label."""
         self.time_label.setText(f"Conversion took {value:.2f} seconds")
 
     def create_settings(self):
+        """Create the settings file with the current file and destination picker directories."""
         settings = {
             "file_picker_dir": self.file_picker_dir,
             "dest_picker_dir": self.dest_picker_dir
@@ -129,6 +139,7 @@ class GUI:
             json.dump(settings, f)
 
     def load_settings_file(self):
+        """Load the settings from the settings file."""
         if not os.path.exists("src/settings.json"):
             return
         with open("src/settings.json", "r", encoding="utf-8") as f:
@@ -136,6 +147,7 @@ class GUI:
         return settings
 
     def update_settings(self):
+        """Update the settings file with the current file and destination picker directories."""
         if not os.path.exists("src/settings.json"):
             self.create_settings()
         with open("src/settings.json", "r", encoding="utf-8") as f:
@@ -146,6 +158,7 @@ class GUI:
             json.dump(settings, f)
 
 class Converter(QObject):
+    """Converter class for converting PPTX files to OpenLyrics XML."""
     progress_signal = Signal(int) # pylint: disable=E0611
 
     def __init__(self):
@@ -155,12 +168,33 @@ class Converter(QObject):
         self.author = ""
         self.dest_picker_dir = ""
         self.blank_slide = False
+        self.assume_title = False
         self.prs = None
         self.ol_song = None
         self.root = None
         self.lyrics = None
 
     def convert(self, input_filename, title, author, blank_slide, assume_title, dest_picker_dir):
+        """Convert a PowerPoint presentation into an OpenLyrics XML file.
+
+        Each text-containing shape is added as a verse associated with its
+        slide. If ``assume_title`` is true, the first shape on the first slide
+        is used as the song title. An empty verse is appended when
+        ``blank_slide`` is true. Progress is emitted as a percentage for each
+        slide, and the XML is saved in ``dest_picker_dir`` using the input
+        filename with an ``.xml`` extension.
+
+        Args:
+            input_filename: Path to the source PPTX file.
+            title: Song title to use unless ``assume_title`` is true.
+            author: Song author to include in the OpenLyrics document.
+            blank_slide: Whether to append an empty verse after the slides.
+            assume_title: Whether to take the title from the first slide.
+            dest_picker_dir: Directory in which to save the XML file.
+
+        Returns:
+            Elapsed conversion time in seconds.
+        """
         start_time = time.perf_counter()
         self.input_filename = input_filename
         self.title = title
@@ -194,7 +228,7 @@ class Converter(QObject):
             self.progress_signal.emit(int(((i + 1) / len(self.prs.slides)) * 100))
         if self.blank_slide:
             self.ol_song.add_verse(self.lyrics, f"v{i+1}", [""]) # pylint: disable=undefined-loop-variable
-        self.ol_song.update_verse_order(i + 1)
+        self.ol_song.update_verse_order(i + 1) # pylint: disable=undefined-loop-variable
 
         self.ol_song.pretty_and_save_xml(self.root, os.path.join(self.dest_picker_dir, os.path.basename(self.input_filename.replace(".pptx", ".xml"))))
         end_time = time.perf_counter()
