@@ -48,6 +48,9 @@ class OpenLyricsSong:
             author_element = ET.SubElement(authors, "author")
             author_element.text = _xml_safe_text(author)
             author_element.set("type", author_type)
+        else:
+            author_element = ET.SubElement(authors, "author")
+            author_element.text = _xml_safe_text(author)
 
         verse_order_element = ET.SubElement(properties, "verseOrder")
         verse_order_element.text = ""
