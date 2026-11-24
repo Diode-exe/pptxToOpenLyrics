@@ -18,7 +18,7 @@ class OpenLyricsSong:
     def __init__(self):
         self.root = None
 
-    def create_openlyrics(self, title, author):
+    def create_openlyrics(self, title, author, author_type):
         # 1. Create the root element with required namespaces
         root = ET.Element("song", {
             "xmlns": "http://openlyrics.info",
@@ -37,8 +37,17 @@ class OpenLyricsSong:
         title_element.text = _xml_safe_text(title)
 
         authors = ET.SubElement(properties, "authors")
-        author_element = ET.SubElement(authors, "author")
-        author_element.text = _xml_safe_text(author)
+        if author_type == "words and music":
+            author_element = ET.SubElement(authors, "author")
+            author_element.text = _xml_safe_text(author)
+            author_element.set("type", "words")
+            author_element_2 = ET.SubElement(authors, "author")
+            author_element_2.text = _xml_safe_text(author)
+            author_element_2.set("type", "music")
+        elif author_type:
+            author_element = ET.SubElement(authors, "author")
+            author_element.text = _xml_safe_text(author)
+            author_element.set("type", author_type)
 
         verse_order_element = ET.SubElement(properties, "verseOrder")
         verse_order_element.text = ""
