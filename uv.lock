@@ -113,6 +113,12 @@ wheels = [
 ]
 
 [[package]]
+name = "nuitka"
+version = "4.3.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/ec/a9a448d2c429865483fdecf3e4d60e4dcdb8738085337cbd2482ec6468ef/nuitka-4.3.5.tar.gz", hash = "sha256:ca1dabc274b95efa7a46597f464ec27484b30f32cb89872d14d66541284d4f01", size = 4780637, upload-time = "2026-11-08T13:01:00.034Z" }
+
+[[package]]
 name = "pillow"
 version = "12.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -188,12 +194,14 @@ name = "pptxtoopenlyrics"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
+    { name = "nuitka" },
     { name = "pyside6" },
     { name = "python-pptx" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "nuitka", specifier = ">=4.3.5" },
     { name = "pyside6", specifier = ">=6.12.0" },
     { name = "python-pptx", specifier = ">=1.0.2" },
 ]
