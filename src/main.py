@@ -229,8 +229,12 @@ class GUI:
         for row, filename in enumerate(self.input_filenames):
             label = QLabel(os.path.basename(filename))
             batch_author_name_entry = QLineEdit()
+            batch_author_name_entry.setPlaceholderText("Author")
+            batch_title_entry = QLineEdit()
+            batch_title_entry.setPlaceholderText("Title")
             self.batching_scroll_layout.addWidget(label, row, 0)
             self.batching_scroll_layout.addWidget(batch_author_name_entry, row, 1)
+            self.batching_scroll_layout.addWidget(batch_title_entry, row, 2)
         self.batching_scroll_layout.setRowStretch(len(self.input_filenames), 1)
 
 
