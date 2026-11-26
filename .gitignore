@@ -187,3 +187,4 @@ Trembling and Shaking/
 lines.txt
 *.json
 *.exe
+/main.dist
