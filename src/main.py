@@ -13,6 +13,7 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
     QCheckBox,
     QMessageBox,
     QLineEdit,
+    QLayout,
     QGridLayout,
     QHBoxLayout,
 )
@@ -68,11 +69,12 @@ class GUI:
 
         self.batching_scroll = self.window.findChild(QScrollArea, "batching_scroll")
         self.batching_scroll_contents = self.window.findChild(QWidget, "batching_scroll_contents")
-        self.batching_scroll_layout = self.window.findChild(QGridLayout, "batching_scroll_layout")
+        self.batching_scroll_layout = self.batching_scroll_contents.findChild(QGridLayout, "batching_scroll_layout")
+        self.batching_scroll_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
         
         self.batch_buttons_layout = self.window.findChild(QHBoxLayout, "batch_buttons_layout")
-        self.choose_files_button_batch = self.window.findChild(QPushButton, "choose_files_button")
-        self.choose_files_button_batch.clicked.connect(self.choose_files)
+        self.choose_files_button = self.window.findChild(QPushButton, "choose_files_button")
+        self.choose_files_button.clicked.connect(self.choose_files)
         
         self.choose_dest_button_batch = self.window.findChild(QPushButton, "choose_dest_button_batch")
         self.choose_dest_button_batch.clicked.connect(self.choose_dest)
@@ -190,15 +192,18 @@ class GUI:
             json.dump(settings, f)
 
     def add_files_to_scroll(self):
+        for row in range(self.batching_scroll_layout.rowCount()):
+            self.batching_scroll_layout.setRowStretch(row, 0)
         while self.batching_scroll_layout.count():
             item = self.batching_scroll_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-        for filename in self.input_filenames:
+        for row, filename in enumerate(self.input_filenames):
             label = QLabel(os.path.basename(filename))
             batch_author_name_entry = QLineEdit()
-            self.batching_scroll_layout.addWidget(label)
-            self.batching_scroll_layout.addWidget(batch_author_name_entry)
+            self.batching_scroll_layout.addWidget(label, row, 0)
+            self.batching_scroll_layout.addWidget(batch_author_name_entry, row, 1)
+        self.batching_scroll_layout.setRowStretch(len(self.input_filenames), 1)
 
 
 class Converter(QObject):
