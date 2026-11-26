@@ -13,6 +13,8 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
     QCheckBox,
     QMessageBox,
     QLineEdit,
+    QGridLayout,
+    QHBoxLayout,
 )
 
 from pptx import Presentation
@@ -63,10 +65,17 @@ class GUI:
         self.author_type = self.window.findChild(QComboBox, "author_type")
         # default to no type, just like the author entry is empty by default in OpenLP
         self.author_type.addItems(["", "words", "music", "words and music", "translation"])
-        
+
         self.batching_scroll = self.window.findChild(QScrollArea, "batching_scroll")
         self.batching_scroll_contents = self.window.findChild(QWidget, "batching_scroll_contents")
-        self.batching_scroll_layout = QVBoxLayout(self.batching_scroll_contents)
+        self.batching_scroll_layout = self.window.findChild(QGridLayout, "batching_grid")
+        
+        self.batch_buttons_layout = self.window.findChild(QHBoxLayout, "batch_buttons_layout")
+        self.choose_files_button_batch = self.window.findChild(QPushButton, "choose_files_button_batch")
+        self.choose_files_button_batch.clicked.connect(self.choose_files)
+        
+        self.choose_dest_button_batch = self.window.findChild(QPushButton, "choose_dest_button_batch")
+        self.choose_dest_button_batch.clicked.connect(self.choose_dest)
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
@@ -86,6 +95,18 @@ class GUI:
 
     def choose_file(self):
         """Open a file dialog to choose a PPTX file."""
+        start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
+        input_filename, _ = QFileDialog.getOpenFileName(
+            self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
+        )
+        if not input_filename:
+            return
+        self.input_filenames = [input_filename]
+        self.add_files_to_scroll()
+        self.file_picker_dir = os.path.dirname(self.input_filenames[0])
+        
+    def choose_files(self):
+        """Open a file dialog to choose PPTX files."""
         start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
         input_filenames, _ = QFileDialog.getOpenFileNames(
             self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
@@ -168,7 +189,7 @@ class GUI:
         settings["dest_picker_dir"] = self.dest_picker_dir
         with open("src/settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
-            
+
     def add_files_to_scroll(self):
         while self.batching_scroll_layout.count():
             item = self.batching_scroll_layout.takeAt(0)
@@ -179,7 +200,7 @@ class GUI:
             batch_author_name_entry = QLineEdit()
             self.batching_scroll_layout.addWidget(label)
             self.batching_scroll_layout.addWidget(batch_author_name_entry)
-            
+
 
 class Converter(QObject):
     """Converter class for converting PPTX files to OpenLyrics XML."""

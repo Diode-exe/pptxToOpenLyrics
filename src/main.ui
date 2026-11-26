@@ -17,11 +17,14 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>60</y>
+      <x>180</x>
+      <y>20</y>
       <width>481</width>
       <height>491</height>
      </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
     </property>
     <widget class="QWidget" name="single_mode_tab">
      <attribute name="title">
@@ -145,6 +148,66 @@
      <attribute name="title">
       <string>Tab 2</string>
      </attribute>
+     <widget class="QScrollArea" name="batching_scroll">
+      <property name="geometry">
+       <rect>
+        <x>-1</x>
+        <y>39</y>
+        <width>481</width>
+        <height>421</height>
+       </rect>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="batching_scroll_contents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>477</width>
+         <height>417</height>
+        </rect>
+       </property>
+       <widget class="QWidget" name="gridLayoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>-1</x>
+          <y>-1</y>
+          <width>481</width>
+          <height>461</height>
+         </rect>
+        </property>
+        <layout class="QGridLayout" name="batching_scroll_layout"/>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>471</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="batch_buttons_layout">
+       <item>
+        <widget class="QPushButton" name="choose_file_button_batch">
+         <property name="text">
+          <string>Choose Files</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="choose_dest_button_batch">
+         <property name="text">
+          <string>Choose Destination</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </widget>
   </widget>
