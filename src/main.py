@@ -4,7 +4,7 @@ import time
 import json
 import os
 from PySide6.QtCore import QFile, QObject, Signal # pylint: disable=E0611
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QProgressBar # pylint: disable=E0611
+from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QProgressBar, QWidget, QComboBox # pylint: disable=E0611
 from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
 from PySide6.QtWidgets import ( # pylint: disable=E0611
     QLabel,
@@ -13,7 +13,9 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
     QCheckBox,
     QMessageBox,
     QLineEdit,
-    QComboBox,
+    QLayout,
+    QGridLayout,
+    QHBoxLayout,
 )
 
 from pptx import Presentation
@@ -23,6 +25,7 @@ class GUI:
     """Graphical User Interface for the PPTX to OpenLyrics Converter."""
     def __init__(self):
         self.input_filename = None
+        self.input_filenames = []
         self.title = ""
         self.author = ""
         self.blank_slide = False
@@ -64,6 +67,23 @@ class GUI:
         # default to no type, just like the author entry is empty by default in OpenLP
         self.author_type.addItems(["", "words", "music", "words and music", "translation"])
 
+        self.batching_scroll = self.window.findChild(QScrollArea, "batching_scroll")
+        self.batching_scroll_contents = self.window.findChild(QWidget, "batching_scroll_contents")
+        self.batching_scroll_layout = self.batching_scroll_contents.findChild(QGridLayout, "batching_scroll_layout")
+        self.batching_scroll_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
+
+        self.batch_buttons_layout = self.window.findChild(QHBoxLayout, "batch_buttons_layout")
+        self.choose_files_button = self.window.findChild(QPushButton, "choose_files_button")
+        self.choose_files_button.clicked.connect(self.choose_files)
+
+        self.choose_dest_button_batch = self.window.findChild(QPushButton, "choose_dest_button_batch")
+        self.choose_dest_button_batch.clicked.connect(self.choose_dest)
+
+        self.start_batch_process = self.window.findChild(QPushButton, "start_batch_process")
+        self.start_batch_process.clicked.connect(self.submit_batch)
+
+        self.guess_title_from_filename = self.window.findChild(QCheckBox, "guess_title_from_filename")
+
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
 
@@ -83,11 +103,25 @@ class GUI:
     def choose_file(self):
         """Open a file dialog to choose a PPTX file."""
         start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
-        self.input_filename = QFileDialog.getOpenFileName(
+        input_filename, _ = QFileDialog.getOpenFileName(
             self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
-        )[0]
-        if self.input_filename:
-            self.file_picker_dir = os.path.dirname(self.input_filename)
+        )
+        if not input_filename:
+            return
+        self.input_filenames = [input_filename] # hack to make it compatible with batch processing, single variable
+        self.file_picker_dir = os.path.dirname(self.input_filenames[0])
+
+    def choose_files(self):
+        """Open a file dialog to choose PPTX files."""
+        start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
+        input_filenames, _ = QFileDialog.getOpenFileNames(
+            self.window, "Select PPTX file", start_dir, "PPTX files (*.pptx)",
+        )
+        if not input_filenames:
+            return
+        self.input_filenames = input_filenames
+        self.add_files_to_scroll()
+        self.file_picker_dir = os.path.dirname(self.input_filenames[0])
 
     def choose_dest(self):
         """Open a file dialog to choose the destination directory."""
@@ -98,9 +132,38 @@ class GUI:
         if chosen:
             self.dest_picker_dir = chosen
 
+    def submit_batch(self):
+        if not self.input_filenames:
+            QMessageBox.critical(
+                self.window, "No file selected", "Please choose a PPTX file first."
+            )
+            return
+
+        self.guess_title_from_filename = self.window.findChild(QCheckBox, "guess_title_from_filename")
+
+        self.blank_slide = self.blank_slide_var.isChecked()
+
+        for i, input_filename in enumerate(self.input_filenames):
+            converter = Converter()
+            converter.progress_signal.connect(self.progress_bar.setValue)
+            if self.guess_title_from_filename.isChecked():
+                title = os.path.splitext(os.path.basename(input_filename))[0]
+            else:
+                title = self.title_entry.text()
+            converter.convert(input_filename, title, self.batching_scroll_layout.itemAtPosition(i, 1).widget().text(), self.blank_slide, False, self.dest_picker_dir)
+            print("Conversion started for file:", input_filename)
+        # self.set_time(conversion_time)
+
+        self.update_settings()
+
+        QMessageBox.information(
+            self.window,
+            "Conversion Complete",
+            "The PPTX files have been successfully converted to OpenLyrics XML.",
+        )
+        print("Batch conversion completed.")
     def submit(self):
-        """Handle the submission of the conversion form."""
-        if not self.input_filename:
+        if not self.input_filenames:
             QMessageBox.critical(
                 self.window, "No file selected", "Please choose a PPTX file first."
             )
@@ -161,6 +224,25 @@ class GUI:
         settings["dest_picker_dir"] = self.dest_picker_dir
         with open("src/settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
+
+    def add_files_to_scroll(self):
+        for row in range(self.batching_scroll_layout.rowCount()):
+            self.batching_scroll_layout.setRowStretch(row, 0)
+        while self.batching_scroll_layout.count():
+            item = self.batching_scroll_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        for row, filename in enumerate(self.input_filenames):
+            label = QLabel(os.path.basename(filename))
+            batch_author_name_entry = QLineEdit()
+            batch_author_name_entry.setPlaceholderText("Author")
+            batch_title_entry = QLineEdit()
+            batch_title_entry.setPlaceholderText("Title")
+            self.batching_scroll_layout.addWidget(label, row, 0)
+            self.batching_scroll_layout.addWidget(batch_author_name_entry, row, 1)
+            self.batching_scroll_layout.addWidget(batch_title_entry, row, 2)
+        self.batching_scroll_layout.setRowStretch(len(self.input_filenames), 1)
+
 
 class Converter(QObject):
     """Converter class for converting PPTX files to OpenLyrics XML."""
