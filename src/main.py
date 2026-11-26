@@ -3,6 +3,7 @@
 import time
 import json
 import os
+from pathlib import Path
 from PySide6.QtCore import QFile, QObject, Signal # pylint: disable=E0611
 from PySide6.QtWidgets import QApplication, QScrollArea, QVBoxLayout, QProgressBar, QWidget, QComboBox # pylint: disable=E0611
 from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
@@ -21,6 +22,8 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
 from pptx import Presentation
 from create_ol import OpenLyricsSong
 
+script_dir = Path(__file__).resolve().parent
+
 class GUI:
     """Graphical User Interface for the PPTX to OpenLyrics Converter."""
     def __init__(self):
@@ -31,23 +34,24 @@ class GUI:
         self.blank_slide = False
         self.file_picker_dir = ""
         self.dest_picker_dir = ""
-        if not os.path.exists("src/settings.json"):
+        settings_path = script_dir / "src/settings.json"
+        if not os.path.exists(settings_path):
             self.create_settings()
-        settings = self.load_settings_file()
+        settings = self.load_settings_file(settings_path)
         if settings:
             self.file_picker_dir = settings.get("file_picker_dir", "")
             self.dest_picker_dir = settings.get("dest_picker_dir", "")
         self.prs = None
         self.ol_song = None
 
-        ui_file = QFile("src/main.ui")
+        ui_file = QFile(script_dir / "main.ui")
 
         loader = QUiLoader()
         self.window = loader.load(ui_file)
         ui_file.close()
 
         if self.window is None:
-            raise RuntimeError(f"Could not load src/main.ui: {loader.errorString()}")
+            raise RuntimeError(f"Could not load main.ui: {loader.errorString()}")
 
         self.window.setWindowTitle("PPTX to OpenLyrics Converter")
         # layout = QVBoxLayout(self.window.centralWidget())
@@ -150,7 +154,7 @@ class GUI:
                 title = os.path.splitext(os.path.basename(input_filename))[0]
             else:
                 title = self.title_entry.text()
-            converter.convert(input_filename, title, self.batching_scroll_layout.itemAtPosition(i, 1).widget().text(), self.blank_slide, False, self.dest_picker_dir)
+            converter.convert(input_filename, title, self.batching_scroll_layout.itemAtPosition(i, 1).widget().text(), self.blank_slide, False, self.dest_picker_dir, self.author_type.currentText())
             print("Conversion started for file:", input_filename)
         # self.set_time(conversion_time)
 
@@ -203,26 +207,27 @@ class GUI:
             "file_picker_dir": self.file_picker_dir,
             "dest_picker_dir": self.dest_picker_dir
         }
-        with open("src/settings.json", "w", encoding="utf-8") as f:
+        with open(script_dir / "settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
 
-    def load_settings_file(self):
+    def load_settings_file(self, settings_path):
         """Load the settings from the settings file."""
-        if not os.path.exists("src/settings.json"):
+        if not os.path.exists(settings_path):
             return
-        with open("src/settings.json", "r", encoding="utf-8") as f:
+        with open(settings_path, "r", encoding="utf-8") as f:
             settings = json.load(f)
         return settings
 
     def update_settings(self):
         """Update the settings file with the current file and destination picker directories."""
-        if not os.path.exists("src/settings.json"):
+        settings_path = script_dir / "settings.json"
+        if not os.path.exists(settings_path):
             self.create_settings()
-        with open("src/settings.json", "r", encoding="utf-8") as f:
+        with open(settings_path, "r", encoding="utf-8") as f:
             settings = json.load(f)
         settings["file_picker_dir"] = self.file_picker_dir
         settings["dest_picker_dir"] = self.dest_picker_dir
-        with open("src/settings.json", "w", encoding="utf-8") as f:
+        with open(settings_path, "w", encoding="utf-8") as f:
             json.dump(settings, f)
 
     def add_files_to_scroll(self):
