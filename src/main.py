@@ -175,7 +175,7 @@ class GUI:
 
         converter = Converter()
         converter.progress_signal.connect(self.progress_bar.setValue)
-        conversion_time = converter.convert(self.input_filenames[0], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
+        conversion_time = converter.convert(self.input_filename, self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir, self.author_type.currentText())
         self.set_time(conversion_time)
 
         self.update_settings()
@@ -261,7 +261,7 @@ class Converter(QObject):
         self.root = None
         self.lyrics = None
 
-    def convert(self, input_filename, title, author, blank_slide, assume_title, dest_picker_dir):
+    def convert(self, input_filename, title, author, blank_slide, assume_title, dest_picker_dir, author_type):
         """Convert a PowerPoint presentation into an OpenLyrics XML file.
 
         Each text-containing shape is added as a verse associated with its
@@ -289,6 +289,7 @@ class Converter(QObject):
         self.blank_slide = blank_slide
         self.assume_title = assume_title
         self.dest_picker_dir = dest_picker_dir
+        self.author_type = author_type
 
         self.prs = Presentation(self.input_filename)
         self.ol_song = OpenLyricsSong()
@@ -298,7 +299,7 @@ class Converter(QObject):
                 None, "No Title Found", "Please provide a title for the song."
             )
 
-        self.root = self.ol_song.create_openlyrics(self.title, self.author)
+        self.root = self.ol_song.create_openlyrics(self.title, self.author, self.author_type)
         self.lyrics = self.root.find("lyrics")
 
         # Loop through slides and shape elements
