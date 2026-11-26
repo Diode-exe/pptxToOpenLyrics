@@ -177,7 +177,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>471</width>
+        <width>479</width>
         <height>41</height>
        </rect>
       </property>
@@ -200,6 +200,13 @@
         <widget class="QPushButton" name="start_batch_process">
          <property name="text">
           <string>Start Process</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="guess_title_from_filename">
+         <property name="text">
+          <string>Guess Title from Filename</string>
          </property>
         </widget>
        </item>

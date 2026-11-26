@@ -81,6 +81,8 @@ class GUI:
         
         self.start_batch_process = self.window.findChild(QPushButton, "start_batch_process")
         self.start_batch_process.clicked.connect(self.submit_batch)
+        
+        self.guess_title_from_filename = self.window.findChild(QCheckBox, "guess_title_from_filename")
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
@@ -137,13 +139,18 @@ class GUI:
             )
             return
         
+        self.guess_title_from_filename = self.window.findChild(QCheckBox, "guess_title_from_filename")
+        
         self.blank_slide = self.blank_slide_var.isChecked()
 
         for i, input_filename in enumerate(self.input_filenames):
             converter = Converter()
             converter.progress_signal.connect(self.progress_bar.setValue)
-
-            converter.convert(input_filename, self.batching_scroll_layout.itemAtPosition(i, 2).widget().text(), self.batching_scroll_layout.itemAtPosition(i, 1).widget().text(), self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
+            if self.guess_title_from_filename.isChecked():
+                title = os.path.splitext(os.path.basename(input_filename))[0]
+            else:
+                title = self.title_entry.text()
+            converter.convert(input_filename, title, self.batching_scroll_layout.itemAtPosition(i, 1).widget().text(), self.blank_slide, False, self.dest_picker_dir)
             print("Conversion started for file:", input_filename)
         # self.set_time(conversion_time)
 
