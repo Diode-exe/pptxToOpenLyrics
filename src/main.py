@@ -78,6 +78,9 @@ class GUI:
         
         self.choose_dest_button_batch = self.window.findChild(QPushButton, "choose_dest_button_batch")
         self.choose_dest_button_batch.clicked.connect(self.choose_dest)
+        
+        self.start_batch_process = self.window.findChild(QPushButton, "start_batch_process")
+        self.start_batch_process.clicked.connect(self.submit_batch)
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
         self.file_chooser_button.clicked.connect(self.choose_file)
@@ -127,6 +130,31 @@ class GUI:
         if chosen:
             self.dest_picker_dir = chosen
 
+    def submit_batch(self):
+        if not self.input_filenames:
+            QMessageBox.critical(
+                self.window, "No file selected", "Please choose a PPTX file first."
+            )
+            return
+
+        self.title = self.title_entry.text()
+        self.author = self.author_entry.text()
+        self.blank_slide = self.blank_slide_var.isChecked()
+
+        converter = Converter()
+        converter.progress_signal.connect(self.progress_bar.setValue)
+        for i, label in enumerate(self.batching_scroll_layout.children()):
+            conversion_time = converter.convert(self.input_filenames[i], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
+        self.set_time(conversion_time)
+
+        self.update_settings()
+
+        QMessageBox.information(
+            self.window,
+            "Conversion Complete",
+            "The PPTX file has been successfully converted to OpenLyrics XML.",
+        )
+        
     def submit(self):
         if not self.input_filenames:
             QMessageBox.critical(

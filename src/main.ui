@@ -196,6 +196,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="start_batch_process">
+         <property name="text">
+          <string>Start Process</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>
