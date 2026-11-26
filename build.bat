@@ -1,2 +1,3 @@
 @echo off
-python -m nuitka --standalone --onefile --enable-plugin=pyside6 --include-data-files=src/main.ui=src/main.ui src/main.py
+python -m nuitka --standalone --onefile --enable-plugin=pyside6 --include-data-files=src/main.ui=main.ui src/main.py
+powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $notify = New-Object System.Windows.Forms.NotifyIcon; $notify.Icon = [System.Drawing.SystemIcons]::Information; $notify.BalloonTipIcon = 'Info'; $notify.BalloonTipTitle = 'Build complete'; $notify.BalloonTipText = 'Build finished.'; $notify.Visible = $true; $notify.ShowBalloonTip(5000); Start-Sleep -Seconds 6; $notify.Dispose()"

@@ -22,7 +22,8 @@ from PySide6.QtWidgets import ( # pylint: disable=E0611
 from pptx import Presentation
 from create_ol import OpenLyricsSong
 
-script_dir = Path(__file__).resolve().parent
+base_dir = os.path.dirname(os.path.abspath(__file__))
+ui_path = os.path.join(base_dir, "main.ui")
 
 class GUI:
     """Graphical User Interface for the PPTX to OpenLyrics Converter."""
@@ -34,7 +35,7 @@ class GUI:
         self.blank_slide = False
         self.file_picker_dir = ""
         self.dest_picker_dir = ""
-        settings_path = script_dir / "src/settings.json"
+        settings_path = "settings.json"
         if not os.path.exists(settings_path):
             self.create_settings()
         settings = self.load_settings_file(settings_path)
@@ -44,7 +45,9 @@ class GUI:
         self.prs = None
         self.ol_song = None
 
-        ui_file = QFile(script_dir / "main.ui")
+        ui_file = QFile(ui_path)
+        if not ui_file.open(QFile.OpenModeFlag.ReadOnly):
+            raise RuntimeError(f"Could not open {ui_path}: {ui_file.errorString()}")
 
         loader = QUiLoader()
         self.window = loader.load(ui_file)
@@ -207,7 +210,7 @@ class GUI:
             "file_picker_dir": self.file_picker_dir,
             "dest_picker_dir": self.dest_picker_dir
         }
-        with open(script_dir / "settings.json", "w", encoding="utf-8") as f:
+        with open("settings.json", "w", encoding="utf-8") as f:
             json.dump(settings, f)
 
     def load_settings_file(self, settings_path):
@@ -220,7 +223,7 @@ class GUI:
 
     def update_settings(self):
         """Update the settings file with the current file and destination picker directories."""
-        settings_path = script_dir / "settings.json"
+        settings_path = "settings.json"
         if not os.path.exists(settings_path):
             self.create_settings()
         with open(settings_path, "r", encoding="utf-8") as f:

@@ -27,6 +27,8 @@ The GUI is very simple and user-friendly, allowing you to select a PowerPoint fi
 
 ![Slide Splitter GUI](images/screenshot0.png)
 
+To rebuild the Windows executable after changes, run `build.bat` from the project directory with the project environment activated.
+
 The script writes an XML file by replacing `.pptx` in the entered filename with `.xml`. For the example above, the output is `songs\example.xml`.
 
 ## What it converts
