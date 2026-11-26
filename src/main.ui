@@ -24,11 +24,14 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
+    </property>
+    <property name="usesScrollButtons">
+     <bool>true</bool>
     </property>
     <widget class="QWidget" name="single_mode_tab">
      <attribute name="title">
-      <string>Tab 1</string>
+      <string>Single Mode</string>
      </attribute>
      <widget class="QWidget" name="verticalLayoutWidget">
       <property name="geometry">
@@ -146,7 +149,7 @@
     </widget>
     <widget class="QWidget" name="batching_mode_tab">
      <attribute name="title">
-      <string>Tab 2</string>
+      <string>Batch Mode</string>
      </attribute>
      <widget class="QScrollArea" name="batching_scroll">
       <property name="geometry">
