@@ -193,7 +193,7 @@
       </property>
       <layout class="QHBoxLayout" name="batch_buttons_layout">
        <item>
-        <widget class="QPushButton" name="choose_file_button_batch">
+        <widget class="QPushButton" name="choose_files_button">
          <property name="text">
           <string>Choose Files</string>
          </property>

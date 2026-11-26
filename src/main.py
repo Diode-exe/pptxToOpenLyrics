@@ -68,10 +68,10 @@ class GUI:
 
         self.batching_scroll = self.window.findChild(QScrollArea, "batching_scroll")
         self.batching_scroll_contents = self.window.findChild(QWidget, "batching_scroll_contents")
-        self.batching_scroll_layout = self.window.findChild(QGridLayout, "batching_grid")
+        self.batching_scroll_layout = self.window.findChild(QGridLayout, "batching_scroll_layout")
         
         self.batch_buttons_layout = self.window.findChild(QHBoxLayout, "batch_buttons_layout")
-        self.choose_files_button_batch = self.window.findChild(QPushButton, "choose_files_button_batch")
+        self.choose_files_button_batch = self.window.findChild(QPushButton, "choose_files_button")
         self.choose_files_button_batch.clicked.connect(self.choose_files)
         
         self.choose_dest_button_batch = self.window.findChild(QPushButton, "choose_dest_button_batch")
@@ -101,8 +101,7 @@ class GUI:
         )
         if not input_filename:
             return
-        self.input_filenames = [input_filename]
-        self.add_files_to_scroll()
+        self.input_filenames = [input_filename] # hack to make it compatible with batch processing, single variable
         self.file_picker_dir = os.path.dirname(self.input_filenames[0])
         
     def choose_files(self):
