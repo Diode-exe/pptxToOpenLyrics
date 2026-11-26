@@ -136,25 +136,25 @@ class GUI:
                 self.window, "No file selected", "Please choose a PPTX file first."
             )
             return
-
-        self.title = self.title_entry.text()
-        self.author = self.author_entry.text()
+        
         self.blank_slide = self.blank_slide_var.isChecked()
 
-        converter = Converter()
-        converter.progress_signal.connect(self.progress_bar.setValue)
-        for i, label in enumerate(self.batching_scroll_layout.children()):
-            conversion_time = converter.convert(self.input_filenames[i], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
-        self.set_time(conversion_time)
+        for i, input_filename in enumerate(self.input_filenames):
+            converter = Converter()
+            converter.progress_signal.connect(self.progress_bar.setValue)
+
+            converter.convert(input_filename, self.batching_scroll_layout.itemAtPosition(i, 2).widget().text(), self.batching_scroll_layout.itemAtPosition(i, 1).widget().text(), self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
+            print("Conversion started for file:", input_filename)
+        # self.set_time(conversion_time)
 
         self.update_settings()
 
         QMessageBox.information(
             self.window,
             "Conversion Complete",
-            "The PPTX file has been successfully converted to OpenLyrics XML.",
+            "The PPTX files have been successfully converted to OpenLyrics XML.",
         )
-        
+        print("Batch conversion completed.")
     def submit(self):
         if not self.input_filenames:
             QMessageBox.critical(
@@ -168,8 +168,7 @@ class GUI:
 
         converter = Converter()
         converter.progress_signal.connect(self.progress_bar.setValue)
-        for i, label in enumerate(self.batching_scroll_layout.children()):
-            conversion_time = converter.convert(self.input_filenames[i], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
+        conversion_time = converter.convert(self.input_filenames[0], self.title, self.author, self.blank_slide, self.guess_title_button.isChecked(), self.dest_picker_dir)
         self.set_time(conversion_time)
 
         self.update_settings()
