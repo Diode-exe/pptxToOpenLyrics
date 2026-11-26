@@ -71,17 +71,17 @@ class GUI:
         self.batching_scroll_contents = self.window.findChild(QWidget, "batching_scroll_contents")
         self.batching_scroll_layout = self.batching_scroll_contents.findChild(QGridLayout, "batching_scroll_layout")
         self.batching_scroll_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
-        
+
         self.batch_buttons_layout = self.window.findChild(QHBoxLayout, "batch_buttons_layout")
         self.choose_files_button = self.window.findChild(QPushButton, "choose_files_button")
         self.choose_files_button.clicked.connect(self.choose_files)
-        
+
         self.choose_dest_button_batch = self.window.findChild(QPushButton, "choose_dest_button_batch")
         self.choose_dest_button_batch.clicked.connect(self.choose_dest)
-        
+
         self.start_batch_process = self.window.findChild(QPushButton, "start_batch_process")
         self.start_batch_process.clicked.connect(self.submit_batch)
-        
+
         self.guess_title_from_filename = self.window.findChild(QCheckBox, "guess_title_from_filename")
 
         self.file_chooser_button = self.window.findChild(QPushButton, "choose_file_button")
@@ -110,7 +110,7 @@ class GUI:
             return
         self.input_filenames = [input_filename] # hack to make it compatible with batch processing, single variable
         self.file_picker_dir = os.path.dirname(self.input_filenames[0])
-        
+
     def choose_files(self):
         """Open a file dialog to choose PPTX files."""
         start_dir = self.file_picker_dir if os.path.isdir(self.file_picker_dir) else os.path.expanduser("~")
@@ -138,9 +138,9 @@ class GUI:
                 self.window, "No file selected", "Please choose a PPTX file first."
             )
             return
-        
+
         self.guess_title_from_filename = self.window.findChild(QCheckBox, "guess_title_from_filename")
-        
+
         self.blank_slide = self.blank_slide_var.isChecked()
 
         for i, input_filename in enumerate(self.input_filenames):
