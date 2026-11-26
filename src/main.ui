@@ -169,16 +169,7 @@
          <height>417</height>
         </rect>
        </property>
-       <widget class="QTableView" name="tableView">
-        <property name="geometry">
-         <rect>
-          <x>-5</x>
-          <y>1</y>
-          <width>481</width>
-          <height>421</height>
-         </rect>
-        </property>
-       </widget>
+       <layout class="QGridLayout" name="batching_scroll_layout"/>
       </widget>
      </widget>
      <widget class="QWidget" name="layoutWidget">
@@ -202,13 +193,6 @@
         <widget class="QPushButton" name="choose_dest_button_batch">
          <property name="text">
           <string>Choose Destination</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="start_button_batch">
-         <property name="text">
-          <string>Start Process</string>
          </property>
         </widget>
        </item>
